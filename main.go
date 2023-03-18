@@ -2,12 +2,18 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/cicdteam/go-deribit"
 	"github.com/cicdteam/go-deribit/models"
 	"github.com/phoebetronic/orderbook-deribit/pkg/orderbook"
+)
+
+const (
+	brk = "\n"
 )
 
 func main() {
@@ -18,6 +24,12 @@ func main() {
 	fmt.Println()
 
 	var err error
+
+	var pat *string
+	{
+		pat = flag.String("pat", "-", "file path for the JSON encoded orderbook stream log, - for stdout")
+		flag.Parse()
+	}
 
 	var erc chan error
 	var clo chan bool
@@ -75,8 +87,26 @@ func main() {
 			}
 		}
 
-		{
+		if *pat == "-" {
 			fmt.Printf("%s\n", byt)
+		} else {
+			var fil *os.File
+			{
+				fil, err = os.OpenFile(*pat, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+				if err != nil {
+					panic(err)
+				}
+			}
+
+			_, err := fil.Write(append(byt, brk...))
+			if err != nil {
+				panic(err)
+			}
+
+			err = fil.Close()
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
