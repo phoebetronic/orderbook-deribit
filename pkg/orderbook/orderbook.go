@@ -40,7 +40,7 @@ func (o *Orderbook) MarshalJSON() ([]byte, error) {
 	}{
 		Ask: o.ask,
 		Bid: o.bid,
-		Tim: time.Now().UTC().Round(time.Second),
+		Tim: time.Now().UTC().Round(time.Millisecond * 100),
 	})
 }
 
